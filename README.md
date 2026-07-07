@@ -47,6 +47,30 @@ visuellement.
 > Note : `npm audit` signale une vulnérabilité modérée dans `esbuild`, propre
 > au serveur de dev Vite exposé publiquement. Sans impact ici (usage local).
 
+### Déploiement (Render)
+
+Le backend (FastAPI + modèle d'embedding) doit tourner en continu : Netlify (statique
+seul) ne convient pas, mais **Render** héberge les deux services depuis le même
+dépôt via `render.yaml` :
+
+1. Sur [render.com](https://render.com) : **New > Blueprint**, sélectionner ce dépôt
+   GitHub. Render détecte `render.yaml` et crée deux services : `rag-md5-api`
+   (backend Python) et `rag-md5-frontend` (site statique).
+2. Une fois les deux déployés une première fois, Render leur a attribué une URL
+   (ex. `https://rag-md5-api-xxxx.onrender.com`). Renseigner alors, dans le
+   dashboard de chaque service (Environment) :
+   - `rag-md5-api` : `GROQ_API_KEY` (secret) et `FRONTEND_ORIGIN` = l'URL du site
+     statique.
+   - `rag-md5-frontend` : `VITE_API_URL` = l'URL du service API.
+3. Redéployer les deux services (manuel, ou automatique si "Auto-Deploy" est activé).
+
+Ces variables ne peuvent pas être connues à l'avance (l'URL dépend du nom pris sur
+Render), d'où ce petit aller-retour manuel après le premier déploiement.
+
+> Le plan gratuit Render met le backend en veille après inactivité (redémarrage à
+> froid ~30-60s) et n'a pas de disque persistant : la base ChromaDB se réindexe à
+> chaque redémarrage. Sans impact fonctionnel, juste un premier appel plus lent.
+
 ---
 
 ## Architecture (POO)
@@ -62,6 +86,7 @@ compare_embeddings.py   EmbeddingComparison     bonus « aller plus loin »
 main.py                 démonstration de bout en bout (CLI)
 api.py                  API FastAPI qui expose RAGAgent (/ask, /health)
 frontend/               interface de chat Vite + React (consomme l'API)
+render.yaml              Blueprint Render (déploie api + frontend)
 prompts/                prompts système (retravaillables sans toucher au code)
 data/05_corpus_rag.csv  corpus : id, text, source, categorie
 ```

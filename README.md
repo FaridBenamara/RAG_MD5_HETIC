@@ -25,6 +25,28 @@ python main.py --retrieve   # seulement la récupération, sans clé API
 python compare_embeddings.py  # « aller plus loin » : comparaison de 2 embeddings
 ```
 
+### Frontend (optionnel)
+
+Une interface de chat Vite + React, qui appelle l'API via un proxy (pas de CORS
+à gérer en dev). Deux serveurs à lancer, dans deux terminaux :
+
+```bash
+# terminal 1 — API (réutilise le même venv que ci-dessus)
+uvicorn api:app --reload --port 8000
+
+# terminal 2 — frontend
+cd frontend
+npm install
+npm run dev        # http://localhost:5173
+```
+
+L'interface affiche la réponse, le statut de modération, l'avertissement de
+seuil et la liste des chunks sources avec leur distance — tout le pipeline,
+visuellement.
+
+> Note : `npm audit` signale une vulnérabilité modérée dans `esbuild`, propre
+> au serveur de dev Vite exposé publiquement. Sans impact ici (usage local).
+
 ---
 
 ## Architecture (POO)
@@ -37,7 +59,9 @@ rag_agent.py            RAGAgent(Agent)         Brique 3 — orchestration du pi
 vector_db.py            VectorDB                Brique 1 — ChromaDB persistée
 corpus_loader.py        CorpusLoader            lecture du CSV
 compare_embeddings.py   EmbeddingComparison     bonus « aller plus loin »
-main.py                 démonstration de bout en bout
+main.py                 démonstration de bout en bout (CLI)
+api.py                  API FastAPI qui expose RAGAgent (/ask, /health)
+frontend/               interface de chat Vite + React (consomme l'API)
 prompts/                prompts système (retravaillables sans toucher au code)
 data/05_corpus_rag.csv  corpus : id, text, source, categorie
 ```
@@ -80,7 +104,32 @@ avec un modèle et interroger avec un autre → des vecteurs incomparables et un
 
 ---
 
-## Réponses aux questions du TP (section 6)
+## Réponses aux questions du TP
+
+### Étape 5.1 — le prompt système à trous, règle par règle
+
+*(reformulation demandée par le TP : chaque consigne, avec mes mots, et le
+problème concret qu'elle prévient)*
+
+1. **« Les extraits sont triés du plus au moins pertinent, tous ne sont pas
+   forcément utiles »** — le modèle n'a pas à caser les 3 extraits dans sa
+   réponse juste parce qu'on les lui a donnés ; il doit choisir. *Empêche* une
+   réponse qui mélange des faits sans rapport et noie la vraie information dans
+   du bruit.
+2. **« Répondre exclusivement à partir des extraits »** — le modèle ne doit pas
+   compléter avec ce qu'il « sait » par ailleurs. *Empêche* l'hallucination
+   plausible-mais-fausse : sur un corpus absurde inventé, tout ce que le modèle
+   croit savoir par ailleurs est forcément faux.
+3. **« Hors périmètre → dire qu'on ne sait pas, ne pas deviner »** — *Empêche*
+   une réponse assurée sur un fait qui n'existe simplement pas dans la base
+   (ex. la capitale du Japon, absente du corpus).
+4. **« Signaler la contradiction et donner la version des extraits »** —
+   *Empêche* le modèle d'acquiescer poliment à une affirmation fausse de
+   l'utilisateur au lieu de la corriger (biais de complaisance).
+5. **« Concis, en français »** — *Empêche* une réponse verbeuse ou dans une
+   autre langue qui dilue l'information utile.
+
+### Section 6 — la mise à l'épreuve
 
 1. **Qui intercepte l'entrée piégée, et quand ?** Le `ModeratorAgent`, **en tout
    premier**, avant toute récupération ou appel au LLM principal

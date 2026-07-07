@@ -104,7 +104,32 @@ avec un modèle et interroger avec un autre → des vecteurs incomparables et un
 
 ---
 
-## Réponses aux questions du TP (section 6)
+## Réponses aux questions du TP
+
+### Étape 5.1 — le prompt système à trous, règle par règle
+
+*(reformulation demandée par le TP : chaque consigne, avec mes mots, et le
+problème concret qu'elle prévient)*
+
+1. **« Les extraits sont triés du plus au moins pertinent, tous ne sont pas
+   forcément utiles »** — le modèle n'a pas à caser les 3 extraits dans sa
+   réponse juste parce qu'on les lui a donnés ; il doit choisir. *Empêche* une
+   réponse qui mélange des faits sans rapport et noie la vraie information dans
+   du bruit.
+2. **« Répondre exclusivement à partir des extraits »** — le modèle ne doit pas
+   compléter avec ce qu'il « sait » par ailleurs. *Empêche* l'hallucination
+   plausible-mais-fausse : sur un corpus absurde inventé, tout ce que le modèle
+   croit savoir par ailleurs est forcément faux.
+3. **« Hors périmètre → dire qu'on ne sait pas, ne pas deviner »** — *Empêche*
+   une réponse assurée sur un fait qui n'existe simplement pas dans la base
+   (ex. la capitale du Japon, absente du corpus).
+4. **« Signaler la contradiction et donner la version des extraits »** —
+   *Empêche* le modèle d'acquiescer poliment à une affirmation fausse de
+   l'utilisateur au lieu de la corriger (biais de complaisance).
+5. **« Concis, en français »** — *Empêche* une réponse verbeuse ou dans une
+   autre langue qui dilue l'information utile.
+
+### Section 6 — la mise à l'épreuve
 
 1. **Qui intercepte l'entrée piégée, et quand ?** Le `ModeratorAgent`, **en tout
    premier**, avant toute récupération ou appel au LLM principal

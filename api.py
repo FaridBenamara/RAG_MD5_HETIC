@@ -6,6 +6,8 @@ RAGAgent est instancié une seule fois au démarrage (le modèle d'embedding et
 la base ChromaDB sont coûteux à charger) et réutilisé pour chaque requête.
 """
 
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -14,9 +16,15 @@ from rag_agent import RAGAgent
 
 app = FastAPI(title="Mon premier RAG - API")
 
+# En local : localhost:5173 (dev Vite). En prod : FRONTEND_ORIGIN pointe vers
+# l'URL du site statique déployé (ex. Render), à ajouter en variable d'env.
+origins = ["http://localhost:5173"]
+if os.environ.get("FRONTEND_ORIGIN"):
+	origins += os.environ["FRONTEND_ORIGIN"].split(",")
+
 app.add_middleware(
 	CORSMiddleware,
-	allow_origins=["http://localhost:5173"],
+	allow_origins=origins,
 	allow_methods=["*"],
 	allow_headers=["*"],
 )

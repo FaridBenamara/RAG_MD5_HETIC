@@ -1,0 +1,35 @@
+# Blueprint Render : déploie le backend (API) et le frontend (site statique)
+# en un clic depuis GitHub. Sur render.com : New > Blueprint > sélectionner ce dépôt.
+#
+# Après le premier déploiement, Render attribue une URL à chaque service.
+# Il faut alors renseigner à la main (dashboard Render, car ces valeurs
+# dépendent des URL générées, inconnues avant le premier déploiement) :
+#   - rag-md5-api      : GROQ_API_KEY (secret), FRONTEND_ORIGIN (URL du site statique)
+#   - rag-md5-frontend : VITE_API_URL (URL du service API)
+# puis redéployer les deux services.
+
+services:
+  - type: web
+    name: rag-md5-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: GROQ_API_KEY
+        sync: false
+      - key: FRONTEND_ORIGIN
+        sync: false
+
+  - type: web
+    name: rag-md5-frontend
+    runtime: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false

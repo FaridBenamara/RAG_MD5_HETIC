@@ -25,6 +25,17 @@ class VectorDB:
 				f"Collection « {collection_name} » absente et aucun chunk fourni."
 			)
 
+	@classmethod
+	def load_or_create(cls, persist_path=CHROMA_PATH, collection_name=COLLECTION_NAME):
+		"""Recharge la base si elle existe déjà sur disque, sinon l'indexe depuis
+		le CSV. Utile pour un environnement neuf (déploiement) où chroma_db/
+		n'existe pas encore : pas besoin d'un lancement préalable de main.py."""
+		try:
+			return cls(persist_path, collection_name)
+		except ValueError:
+			from corpus_loader import CorpusLoader
+			return cls(persist_path, collection_name, chunks=CorpusLoader().load())
+
 	def _create(self, collection_name, chunks, embedding_model_name):
 		self.embedding_model_name = embedding_model_name
 		self.model = SentenceTransformer(embedding_model_name)

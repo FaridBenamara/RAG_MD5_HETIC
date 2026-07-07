@@ -7,7 +7,7 @@ from vector_db import VectorDB
 class RAGAgent(Agent):
 	def __init__(self, use_moderator=True, distance_threshold=DISTANCE_THRESHOLD):
 		super().__init__()
-		self.db = VectorDB()
+		self.db = VectorDB.load_or_create()
 		self.moderator = ModeratorAgent() if use_moderator else None
 		self.system_template = Agent.read_file(RAG_PROMPT_SYSTEM)
 		self.distance_threshold = distance_threshold

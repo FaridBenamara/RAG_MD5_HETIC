@@ -25,6 +25,28 @@ python main.py --retrieve   # seulement la récupération, sans clé API
 python compare_embeddings.py  # « aller plus loin » : comparaison de 2 embeddings
 ```
 
+### Frontend (optionnel)
+
+Une interface de chat Vite + React, qui appelle l'API via un proxy (pas de CORS
+à gérer en dev). Deux serveurs à lancer, dans deux terminaux :
+
+```bash
+# terminal 1 — API (réutilise le même venv que ci-dessus)
+uvicorn api:app --reload --port 8000
+
+# terminal 2 — frontend
+cd frontend
+npm install
+npm run dev        # http://localhost:5173
+```
+
+L'interface affiche la réponse, le statut de modération, l'avertissement de
+seuil et la liste des chunks sources avec leur distance — tout le pipeline,
+visuellement.
+
+> Note : `npm audit` signale une vulnérabilité modérée dans `esbuild`, propre
+> au serveur de dev Vite exposé publiquement. Sans impact ici (usage local).
+
 ---
 
 ## Architecture (POO)
@@ -37,7 +59,9 @@ rag_agent.py            RAGAgent(Agent)         Brique 3 — orchestration du pi
 vector_db.py            VectorDB                Brique 1 — ChromaDB persistée
 corpus_loader.py        CorpusLoader            lecture du CSV
 compare_embeddings.py   EmbeddingComparison     bonus « aller plus loin »
-main.py                 démonstration de bout en bout
+main.py                 démonstration de bout en bout (CLI)
+api.py                  API FastAPI qui expose RAGAgent (/ask, /health)
+frontend/               interface de chat Vite + React (consomme l'API)
 prompts/                prompts système (retravaillables sans toucher au code)
 data/05_corpus_rag.csv  corpus : id, text, source, categorie
 ```

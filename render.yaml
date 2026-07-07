@@ -23,10 +23,8 @@ services:
       - key: FRONTEND_ORIGIN
         sync: false
 
-  - type: web
+  - type: static
     name: rag-md5-frontend
-    runtime: static
-    plan: free
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist

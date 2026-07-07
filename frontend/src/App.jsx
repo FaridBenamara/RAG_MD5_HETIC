@@ -28,6 +28,10 @@ function SourceList({ chunks }) {
 	);
 }
 
+// En local : vide -> passe par le proxy Vite "/api" (voir vite.config.js).
+// En prod (Render, Netlify...) : VITE_API_URL pointe directement vers le backend déployé.
+const API_BASE = import.meta.env.VITE_API_URL || "/api";
+
 export default function App() {
 	const [question, setQuestion] = useState("");
 	const [loading, setLoading] = useState(false);
@@ -41,7 +45,7 @@ export default function App() {
 		setError(null);
 		setResult(null);
 		try {
-			const res = await fetch("/api/ask", {
+			const res = await fetch(`${API_BASE}/ask`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ question }),

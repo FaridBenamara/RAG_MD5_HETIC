@@ -5,3 +5,7 @@ chromadb>=0.5.0
 # Génération + modération (Briques 2 et 3)
 groq>=0.11.0
 python-dotenv>=1.0.0
+
+# API pour le frontend Vite
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0

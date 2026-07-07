@@ -1,17 +1,11 @@
 import argparse
 
-from corpus_loader import CorpusLoader
 from vector_db import VectorDB
 
 
 def build_or_load_db():
-	try:
-		db = VectorDB()
-		print(f"[base] rechargée ({db.count()} chunks).")
-	except ValueError:
-		print("[base] création depuis le CSV...")
-		db = VectorDB(chunks=CorpusLoader().load())
-		print(f"[base] créée ({db.count()} chunks).")
+	db = VectorDB.load_or_create()
+	print(f"[base] prête ({db.count()} chunks).")
 	return db
 
 

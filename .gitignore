@@ -1,0 +1,21 @@
+# Secrets — ne JAMAIS committer la clé API
+.env
+
+# Base vectorielle persistée (générée au premier lancement)
+chroma_db/
+
+# Environnements virtuels
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Caches modèles / OS
+.cache/
+.DS_Store
+Thumbs.db
